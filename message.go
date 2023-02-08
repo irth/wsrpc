@@ -8,10 +8,3 @@ type messageWrapper struct {
 type Message interface {
 	Type() string
 }
-
-func (c *Conn) SendMessage(m Message) error {
-	return c.SendRaw(messageWrapper{
-		Type:    m.Type(),
-		Message: m,
-	})
-}

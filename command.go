@@ -52,7 +52,7 @@ func (c Command[RequestT, ReplyT]) OK(reply ReplyT) error {
 }
 
 func (c Command[RequestT, ReplyT]) Err(format string, args ...interface{}) error {
-	response := Response[ReplyT]{
+	response := Response[any]{
 		CommandMeta: c.CommandMeta,
 		OK:          false,
 		Error:       fmt.Sprintf(format, args...),
