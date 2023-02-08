@@ -1,5 +1,7 @@
 # wsrpc
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/irth/wsrpc.svg)](https://pkg.go.dev/github.com/irth/wsrpc)
+
 A simple package to make it easier to handle RPC over websockets.
 
 Reads/writes should be thread safe.
