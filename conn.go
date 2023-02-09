@@ -27,6 +27,9 @@ type Conn struct {
 	writeLock sync.Mutex
 }
 
+// NewConn upgrades the connection to a WebSocket and returns a *Conn which can
+// be used for further communication. The palette argument is used to register
+// command types that the server is supposed to understand.
 func NewConn(w http.ResponseWriter, r *http.Request, palette CommandPalette) (*Conn, error) {
 	conn, _, _, err := ws.UpgradeHTTP(r, w)
 
@@ -56,11 +59,22 @@ func NewConn(w http.ResponseWriter, r *http.Request, palette CommandPalette) (*C
 	return wsconn, nil
 }
 
+// Close closes the underlying websocket connection.
 func (c *Conn) Close() error {
 	return c.conn.Close()
 }
 
-func (c *Conn) RecvRaw(obj interface{}) error {
+// SendMessage pushes a message (any type implementing the Message interface) to
+// the client.
+// SendMessage can be used from multiple threads simultaneously.
+func (c *Conn) SendMessage(m Message) error {
+	return c.sendRaw(messageWrapper{
+		Type:    m.Type(),
+		Message: m,
+	})
+}
+
+func (c *Conn) recvRaw(obj interface{}) error {
 	c.readLock.Lock()
 	defer c.readLock.Unlock()
 
@@ -80,7 +94,7 @@ func (c *Conn) RecvRaw(obj interface{}) error {
 	return nil
 }
 
-func (c *Conn) SendRaw(obj interface{}) error {
+func (c *Conn) sendRaw(obj interface{}) error {
 	c.writeLock.Lock()
 	defer c.writeLock.Unlock()
 
@@ -92,11 +106,4 @@ func (c *Conn) SendRaw(obj interface{}) error {
 		return fmt.Errorf("flush: %w", err)
 	}
 	return nil
-}
-
-func (c *Conn) SendMessage(m Message) error {
-	return c.SendRaw(messageWrapper{
-		Type:    m.Type(),
-		Message: m,
-	})
 }

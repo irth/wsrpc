@@ -2,12 +2,17 @@ package wsrpc
 
 import "fmt"
 
-type CommandPalette map[string]FromRawable
+// CommandPalette maps type names to actual Command types.
+// Use the zero value of your command types as the values.
+type CommandPalette map[string]fromRawable
 
+// Decode reads and decodes a single command from the websocket in a blocking
+// manner.
+// Decode can be called safely from multiple threads at once.
 func (c *CommandDecoder) Decode() (Errable, error) {
 	rawCommand := RawCommand{}
 
-	err := c.wsconn.RecvRaw(&rawCommand)
+	err := c.wsconn.recvRaw(&rawCommand)
 	if err != nil {
 		return nil, err
 	}
@@ -28,6 +33,7 @@ func (c *CommandDecoder) Decode() (Errable, error) {
 	return cmd, nil
 }
 
+// CommandDecoder handles decoding the commands.
 type CommandDecoder struct {
 	wsconn  *Conn
 	palette CommandPalette
