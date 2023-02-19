@@ -1,6 +1,7 @@
 package wsrpc
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -57,6 +58,19 @@ func NewConn(w http.ResponseWriter, r *http.Request, palette CommandPalette) (*C
 	wsconn.CommandDecoder = cmdDecoder
 
 	return wsconn, nil
+}
+
+// Pump starts a pump goroutine that decodes the messages into a Go channel and
+// returns an object wrapping the channel. See: the Pump interface.
+//
+// The goroutine stops once the context expires/gets cancelled.
+//
+// Useful when one needs to read from multiple sources using a select{}
+// statement.
+func (c *Conn) Pump(ctx context.Context) Pump {
+	p := newPump(&c.CommandDecoder)
+	go p.run(ctx)
+	return p
 }
 
 // Close closes the underlying websocket connection.
