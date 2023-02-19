@@ -6,6 +6,12 @@ import "fmt"
 // Use the zero value of your command types as the values.
 type CommandPalette map[string]fromRawable
 
+// CommandDecoder handles decoding the commands.
+type CommandDecoder struct {
+	wsconn  *Conn
+	palette CommandPalette
+}
+
 // Decode reads and decodes a single command from the websocket in a blocking
 // manner.
 // Decode can be called safely from multiple threads at once.
@@ -31,10 +37,4 @@ func (c *CommandDecoder) Decode() (Errable, error) {
 	}
 
 	return cmd, nil
-}
-
-// CommandDecoder handles decoding the commands.
-type CommandDecoder struct {
-	wsconn  *Conn
-	palette CommandPalette
 }
